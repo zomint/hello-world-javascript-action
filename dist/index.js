@@ -9612,6 +9612,14 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 8612:
+/***/ ((module) => {
+
+module.exports = eval("require")("@octokit/action");
+
+
+/***/ }),
+
 /***/ 8197:
 /***/ ((module) => {
 
@@ -9791,6 +9799,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(609);
 const github = __nccwpck_require__(8841);
+const { Octokit } = __nccwpck_require__(8612);
 
 try {
   // `who-to-greet` input defined in action metadata file
@@ -9803,6 +9812,30 @@ try {
   console.log(`The event payload: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
+}
+
+async function GetBranches() {
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+  console.log(`owner: ${owner}`);
+  console.log(`repo: ${repo}`);
+
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN
+  })
+  await octokit.request(`GET /repos/${owner}/${repo}/branches`, {
+    owner: `${owner}`,
+    repo: `${repo}`,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+}
+
+try {
+  GetBranches();
+} catch (error) {
+  core.setFailed(error.message);
+  console.log(error.message);
 }
 })();
 
