@@ -12,7 +12,7 @@ inputs:
     description: 'the name of the tag'
     required: true
   target_commitish:
-    description: 'Specifies the commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. Unused if the Git tag already exists. Default: the repository's default branch'
+    description: "Specifies the commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. Unused if the Git tag already exists. Default: the repository's default branch"
     required: false
     default: null
   name:
