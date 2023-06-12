@@ -15002,15 +15002,15 @@ async function createRelease() {
   const { data: response_data } = await octokit.request(`POST /repos/${owner}/${repo}/releases`, {
     owner: `${owner}`,
     repo: `${repo}`,
-    tag_name: process.env.INPUT_TAG_NAME,
-    target_commitish: process.env.INPUT_TARGET_COMMITISH,
-    name: process.env.INPUT_NAME,
-    body: process.env.INPUT_BODY,
+    tag_name: process.env.INPUT_TAG_NAME || undefined,
+    target_commitish: process.env.INPUT_TARGET_COMMITISH || undefined,
+    name: process.env.INPUT_NAME || undefined,
+    body: process.env.INPUT_BODY || undefined,
     draft: stringToBool(process.env.INPUT_DRAFT),
     prerelease: stringToBool(process.env.INPUT_PRERELEASE),
-    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME,
+    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME || undefined,
     generate_release_notes: stringToBool(process.env.INPUT_GENERATE_RELEASE_NOTES),
-    make_latest: process.env.INPUT_MAKE_LATEST,
+    make_latest: process.env.INPUT_MAKE_LATEST || undefined,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
     }
