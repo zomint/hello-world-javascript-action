@@ -15006,7 +15006,7 @@ async function createRelease() {
     body: process.env.INPUT_BODY,
     draft: stringToBool(process.env.INPUT_DRAFT),
     prerelease: stringToBool(process.env.INPUT_PRERELEASE),
-    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME,
+    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME?.toString(),
     generate_release_notes: stringToBool(process.env.INPUT_GENERATE_RELEASE_NOTES),
     make_latest: process.env.INPUT_MAKE_LATEST,
     headers: {
