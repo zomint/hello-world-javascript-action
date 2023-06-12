@@ -14997,6 +14997,8 @@ async function createRelease() {
     auth: process.env.INPUT_GITHUB_TOKEN
   })
 
+  console.log(`process.env.INPUT_NAME: ${process.env.INPUT_NAME}`);
+  console.log(`process.env.INPUT_DISCUSSION_CATEGORY_NAME: ${process.env.INPUT_DISCUSSION_CATEGORY_NAME}`);
   const { data: response_data } = await octokit.request(`POST /repos/${owner}/${repo}/releases`, {
     owner: `${owner}`,
     repo: `${repo}`,
