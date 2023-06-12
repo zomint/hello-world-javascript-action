@@ -1,13 +1,48 @@
 name: 'auto release'
 description: 'auto release'
 inputs:
-  tag:  # tag
-    description: 'release tag name'
-    required: true
   github_token:
     description: 'github token'
     required: true
-
+  force:
+    description: 'force update tag and release if tag or release is existed'
+    required: false
+    default: true
+  tag_name:
+    description: 'the name of the tag'
+    required: true
+  target_commitish:
+    description: 'Specifies the commitish value that determines where the Git tag is created from. Can be any branch or commit SHA. Unused if the Git tag already exists. Default: the repository's default branch'
+    required: false
+    default: null
+  name:
+    description: 'the name of the release'
+    required: false
+    default: null
+  body:
+    description: 'text describing the contents of the tag'
+    required: false
+    default: null
+  draft:
+    description: 'true to create a draft (unpublished) release, false to create a published one'
+    required: false
+    default: false
+  prerelease:
+    description: 'true to identify the release as a prerelease. false to identify the release as a full release'
+    required: false
+    default: false
+  discussion_category_name:
+    description: 'If specified, a discussion of the specified category is created and linked to the release. The value must be a category that already exists in the repository. For more information, see "Managing categories for discussions in your repository."'
+    required: false
+    default: null
+  generate_release_notes:
+    description: 'Whether to automatically generate the name and body for this release. If name is specified, the specified name will be used; otherwise, a name will be automatically generated. If body is specified, the body will be pre-pended to the automatically generated notes.'
+    required: false
+    default: false
+  make_latest:
+    description: 'Specifies whether this release should be set as the latest release for the repository. Drafts and prereleases cannot be set as latest. defaults to true for newly published releases. legacy specifies that the latest release should be determined based on the release creation date and higher semantic version.'
+    required: false
+    default: true
 runs:
-  using: 'node16'
+  using: 'node18'
   main: 'dist/index.js'

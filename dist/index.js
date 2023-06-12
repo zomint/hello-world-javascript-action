@@ -14949,35 +14949,16 @@ const core = __nccwpck_require__(609);
 const github = __nccwpck_require__(8841);
 const { Octokit } = __nccwpck_require__(7313);
 
-console.log(process.env.GITHUB_REPOSITORY)
-
-async function getBranches() {
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
-
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
-  })
-  const { data: response_data } = await octokit.request(`GET /repos/${owner}/${repo}/branches`, {
-    owner: `${owner}`,
-    repo: `${repo}`,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  console.log(`response_data: ${response_data}`)
-  console.log(`getBranches response data: ${JSON.stringify(response_data, undefined, 2)}`)
-}
-
-async function getRelease(github_token, tag) {
+async function getRelease() {
   console.log('getRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: `${github_token}`
+    auth: process.env.INPUT_GITHUB_TOKEN
   })
+
+  tag = process.env.INPUT_TAG_NAME
 
   try {
     const { data: response_data } = await octokit.request(`GET /repos/${owner}/${repo}/releases/tags/${tag}`, {
@@ -14997,25 +14978,27 @@ async function getRelease(github_token, tag) {
   }
 }
 
-async function createRelease(github_token, tag) {
+async function createRelease() {
   console.log('createRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: `${github_token}`
+    auth: process.env.INPUT_GITHUB_TOKEN
   })
 
   const { data: response_data } = await octokit.request(`POST /repos/${owner}/${repo}/releases`, {
     owner: `${owner}`,
     repo: `${repo}`,
-    tag_name: `${tag}`,
-    target_commitish: 'main',
-    name: `${tag}`,
-    body: '',
-    draft: false,
-    prerelease: false,
-    generate_release_notes: false,
+    tag_name: process.env.INPUT_TAG_NAME,
+    target_commitish: process.env.INPUT_TARGET_COMMITISH,
+    name: process.env.INPUT_NAME,
+    body: process.env.INPUT_BODY,
+    draft: process.env.INPUT_DRAFT,
+    prerelease: process.env.INPUT_PRERELEASE,
+    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME,
+    generate_release_notes: process.env.INPUT_GENERATE_RELEASE_NOTES,
+    make_latest: process.env.INPUT_MAKE_LATEST,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
     }
@@ -15023,25 +15006,7 @@ async function createRelease(github_token, tag) {
   console.log(`createRelease data: ${JSON.stringify(response_data, undefined, 2)}`)
 }
 
-async function listRelease() {
-  console.log('listRelease')
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
-  })
-  const { data } = await octokit.request(`GET /repos/${owner}/${repo}/releases`, {
-    owner: `${owner}`,
-    repo: `${repo}`,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  console.log(`listRelease data: ${JSON.stringify(data, undefined, 2)}`)
-}
-
-async function deleteRelease(github_token, release_id) {
+async function deleteRelease(release_id) {
   if (release_id == null) {
     return null;
   }
@@ -15050,61 +15015,36 @@ async function deleteRelease(github_token, release_id) {
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: `${github_token}`
-  })
-  try {
-    await octokit.request(`DELETE /repos/${owner}/${repo}/releases/${release_id}`, {
-      owner: `${owner}`,
-      repo: `${repo}`,
-      release_id: `${release_id}`,
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-  } catch (error) {
-    console.log(`error: ${error.message}`);
-  }
-}
-
-async function deleteReference(reference) {
-  console.log('deleteReference')
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+    auth: process.env.INPUT_GITHUB_TOKEN
   })
 
-  try {
-    const { status } = await octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/${reference}`, {
-      owner: `${owner}`,
-      repo: `${repo}`,
-      ref: `${reference}`,
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-
-    console.log(`deleteReference status: ${status}`)
-  } catch (error) {
-
-  }
+  await octokit.request(`DELETE /repos/${owner}/${repo}/releases/${release_id}`, {
+    owner: `${owner}`,
+    repo: `${repo}`,
+    release_id: `${release_id}`,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
 }
 
-async function updateTag(github_token, tag) {
+async function updateTag() {
   console.log('updateTag')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: `${github_token}`
+    auth: process.env.INPUT_GITHUB_TOKEN
   })
+
+  tag = process.env.INPUT_TAG_NAME
+
   try {
     await octokit.request(`PATCH /repos/${owner}/${repo}/git/refs/tags/${tag}`, {
       owner: `${owner}`,
       repo: `${repo}`,
       ref: `tags/${tag}`,
-      sha: process.env.GITHUB_SHA,
+      sha: process.env.INPUT_TARGET_COMMITISH,
       force: true,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
@@ -15115,27 +15055,29 @@ async function updateTag(github_token, tag) {
   }
 }
 
-async function autoRelease(github_token, tag) {
-  release_id = await getRelease(github_token, tag);
+async function autoRelease() {
+  release_id = await getRelease();
   if (release_id != null) {
-    await deleteRelease(github_token, release_id)
+    await deleteRelease(release_id)
   }
 
-  updateTag(github_token, tag);
-  await createRelease(github_token, tag);
+  updateTag();
+  await createRelease();
 }
 
 try {
-  const tag = core.getInput('tag');
-  const github_token = core.getInput('github_token');
-  // tag = 'main'
-  console.log(`tag: ${tag}`)
-  if (tag == '' || tag == null) {
-    core.setFailed("invalid tag");
-    console.log("invalid tag");
-    return
+  console.log(process.env.INPUT_TAG_NAME)
+  // console.log(process.env.INPUT_GITHUB_TOKEN)
+
+  if (process.env.INPUT_TAG_NAME == undefined) {
+    throw new Error("undefined tag name");
   }
-  autoRelease(github_token, tag);
+
+  if (process.env.INPUT_GITHUB_TOKEN == undefined) {
+    throw new Error("undefined github token");
+  }
+
+  autoRelease();
 } catch (error) {
   core.setFailed(error.message);
   console.log(error.message);
