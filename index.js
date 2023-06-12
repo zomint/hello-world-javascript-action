@@ -168,8 +168,8 @@ async function updateTag(github_token, tag) {
   }
 }
 
-async function autoRelease(tag, github_token) {
-  release_id = await getRelease(tag);
+async function autoRelease(github_token, tag) {
+  release_id = await getRelease(github_token, tag);
   if (release_id != null) {
     await deleteRelease(github_token, release_id)
   }
@@ -181,13 +181,14 @@ async function autoRelease(tag, github_token) {
 try {
   const tag = core.getInput('tag');
   const github_token = core.getInput('github_token');
+  // tag = 'main'
   console.log(`tag: ${tag}`)
   if (tag == '' || tag == null) {
     core.setFailed("invalid tag");
     console.log("invalid tag");
     return
   }
-  autoRelease(tag);
+  autoRelease(github_token, tag);
 } catch (error) {
   core.setFailed(error.message);
   console.log(error.message);
