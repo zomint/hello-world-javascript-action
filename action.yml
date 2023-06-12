@@ -4,7 +4,9 @@ inputs:
   tag:  # tag
     description: 'release tag name'
     required: true
-    default: 'lasted'
+  github_token:
+    description: 'github token'
+    required: true
 
 runs:
   using: 'node16'

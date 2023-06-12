@@ -23,13 +23,13 @@ async function getBranches() {
   console.log(`getBranches response data: ${JSON.stringify(response_data, undefined, 2)}`)
 }
 
-async function getRelease(tag) {
+async function getRelease(github_token, tag) {
   console.log('getRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+    auth: `${github_token}`
   })
 
   try {
@@ -50,13 +50,13 @@ async function getRelease(tag) {
   }
 }
 
-async function createRelease(tag) {
+async function createRelease(github_token, tag) {
   console.log('createRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+    auth: `${github_token}`
   })
 
   const { data: response_data } = await octokit.request(`POST /repos/${owner}/${repo}/releases`, {
@@ -94,7 +94,7 @@ async function listRelease() {
   console.log(`listRelease data: ${JSON.stringify(data, undefined, 2)}`)
 }
 
-async function deleteRelease(release_id) {
+async function deleteRelease(github_token, release_id) {
   if (release_id == null) {
     return null;
   }
@@ -103,7 +103,7 @@ async function deleteRelease(release_id) {
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+    auth: `${github_token}`
   })
   try {
     await octokit.request(`DELETE /repos/${owner}/${repo}/releases/${release_id}`, {
@@ -144,13 +144,13 @@ async function deleteReference(reference) {
   }
 }
 
-async function updateTag(tag) {
+async function updateTag(github_token, tag) {
   console.log('updateTag')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+    auth: `${github_token}`
   })
   try {
     await octokit.request(`PATCH /repos/${owner}/${repo}/git/refs/tags/${tag}`, {
@@ -168,18 +168,19 @@ async function updateTag(tag) {
   }
 }
 
-async function autoRelease(tag) {
+async function autoRelease(tag, github_token) {
   release_id = await getRelease(tag);
   if (release_id != null) {
-    await deleteRelease(release_id)
+    await deleteRelease(github_token, release_id)
   }
 
-  updateTag(tag);
-  await createRelease(tag);
+  updateTag(github_token, tag);
+  await createRelease(github_token, tag);
 }
 
 try {
   const tag = core.getInput('tag');
+  const github_token = core.getInput('github_token');
   console.log(`tag: ${tag}`)
   if (tag == '' || tag == null) {
     core.setFailed("invalid tag");
