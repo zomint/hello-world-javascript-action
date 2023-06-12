@@ -109,7 +109,7 @@ async function updateTag() {
       owner: `${owner}`,
       repo: `${repo}`,
       ref: `tags/${tag}`,
-      sha: process.env.INPUT_TARGET_COMMITISH,
+      sha: process.env.INPUT_TARGET_COMMITISH || process.env.GITHUB_SHA,
       force: true,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
