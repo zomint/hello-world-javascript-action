@@ -15071,9 +15071,9 @@ async function autoRelease() {
   release_id = await getRelease();
   if (release_id != null) {
     await deleteRelease(release_id)
+    await updateTag();
   }
 
-  updateTag();
   await createRelease();
 }
 
