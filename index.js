@@ -2,6 +2,16 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/action");
 
+function stringToBool(string) {
+  if (string === 'true') {
+    return true;
+  } else if (string === 'false') {
+    return false;
+  } else {
+    return undefined;
+  }
+}
+
 async function getRelease() {
   console.log('getRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
@@ -47,10 +57,10 @@ async function createRelease() {
     target_commitish: process.env.INPUT_TARGET_COMMITISH,
     name: process.env.INPUT_NAME,
     body: process.env.INPUT_BODY,
-    draft: process.env.INPUT_DRAFT,
-    prerelease: process.env.INPUT_PRERELEASE,
+    draft: stringToBool(process.env.INPUT_DRAFT),
+    prerelease: stringToBool(process.env.INPUT_PRERELEASE),
     discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME,
-    generate_release_notes: process.env.INPUT_GENERATE_RELEASE_NOTES,
+    generate_release_notes: stringToBool(process.env.INPUT_GENERATE_RELEASE_NOTES),
     make_latest: process.env.INPUT_MAKE_LATEST,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
