@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
 const { Octokit } = require("@octokit/action");
 
 function stringToBool(string) {
@@ -15,55 +14,45 @@ function stringToBool(string) {
 async function getRelease() {
   console.log('getRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.INPUT_GITHUB_TOKEN
+    auth: core.getInput('github_token', { required: true })
   })
 
-  tag = process.env.INPUT_TAG_NAME
-
   try {
-    const { data: response_data } = await octokit.request(`GET /repos/${owner}/${repo}/releases/tags/${tag}`, {
+    const { data: response_data } = await octokit.request(`GET /repos/${owner}/${repo}/releases/tags/${core.getInput('tag_name', { required: true })}`, {
       owner: `${owner}`,
       repo: `${repo}`,
-      tag: `${tag}`,
+      tag: `${core.getInput('tag_name', { required: true })}`,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     })
     id = response_data.id;
     console.log(`getRelease id: ${id}`)
-    // console.log(`getRelease data: ${JSON.stringify(response_data, undefined, 2)}`)
     return id;
   } catch (error) {
-    return null
   }
 }
 
 async function createRelease() {
   console.log('createRelease')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.INPUT_GITHUB_TOKEN
+    auth: core.getInput('github_token', { required: true })
   })
 
-  console.log(`process.env.INPUT_NAME: ${process.env.INPUT_NAME}`);
-  console.log(`process.env.INPUT_DISCUSSION_CATEGORY_NAME: ${process.env.INPUT_DISCUSSION_CATEGORY_NAME}`);
   const { data: response_data } = await octokit.request(`POST /repos/${owner}/${repo}/releases`, {
     owner: `${owner}`,
     repo: `${repo}`,
-    tag_name: process.env.INPUT_TAG_NAME || undefined,
-    target_commitish: process.env.INPUT_TARGET_COMMITISH || undefined,
-    name: process.env.INPUT_NAME || undefined,
-    body: process.env.INPUT_BODY || undefined,
-    draft: stringToBool(process.env.INPUT_DRAFT),
-    prerelease: stringToBool(process.env.INPUT_PRERELEASE),
-    discussion_category_name: process.env.INPUT_DISCUSSION_CATEGORY_NAME || undefined,
-    generate_release_notes: stringToBool(process.env.INPUT_GENERATE_RELEASE_NOTES),
-    make_latest: process.env.INPUT_MAKE_LATEST || undefined,
+    tag_name: core.getInput('tag_name', { required: true }) || undefined,
+    target_commitish: core.getInput('target_commitish') || undefined,
+    name: core.getInput('name') || undefined,
+    body: core.getInput('body') || undefined,
+    draft: core.getBooleanInput('draft'),
+    prerelease: core.getBooleanInput('prerelease'),
+    discussion_category_name: core.getInput('discussion_category_name') || undefined,
+    generate_release_notes: core.getBooleanInput('generate_release_notes'),
+    make_latest: core.getInput('make_latest') || undefined,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
     }
@@ -72,15 +61,13 @@ async function createRelease() {
 }
 
 async function deleteRelease(release_id) {
-  if (release_id == null) {
-    return null;
+  if (!release_id) {
+    return;
   }
   console.log(`deleteRelease: ${release_id}`)
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  console.log(`owner: ${owner}`);
-  console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.INPUT_GITHUB_TOKEN
+    auth: core.getInput('github_token', { required: true })
   })
 
   await octokit.request(`DELETE /repos/${owner}/${repo}/releases/${release_id}`, {
@@ -99,31 +86,33 @@ async function updateTag() {
   console.log(`owner: ${owner}`);
   console.log(`repo: ${repo}`);
   const octokit = new Octokit({
-    auth: process.env.INPUT_GITHUB_TOKEN
+    auth: core.getInput('github_token', { required: true })
   })
 
-  tag = process.env.INPUT_TAG_NAME
+  tag = core.getInput('tag_name', { required: true })
 
   try {
-    await octokit.request(`PATCH /repos/${owner}/${repo}/git/refs/tags/${tag}`, {
+    await octokit.request(`PATCH /repos/${owner}/${repo}/git/refs/tags/${core.getInput('tag_name', { required: true })}`, {
       owner: `${owner}`,
       repo: `${repo}`,
-      ref: `tags/${tag}`,
-      sha: process.env.INPUT_TARGET_COMMITISH || process.env.GITHUB_SHA,
+      ref: `tags/${core.getInput('tag_name', { required: true })}`,
+      sha: core.getInput('target_commitish') || process.env.GITHUB_SHA,
       force: true,
       headers: {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     })
   } catch (error) {
-
   }
 }
 
 async function autoRelease() {
-  release_id = await getRelease();
-  if (release_id != null) {
-    await deleteRelease(release_id)
+  if (core.getBooleanInput('force')) {
+    release_id = await getRelease();
+    if (release_id != null) {
+      await deleteRelease(release_id)
+    }
+
     await updateTag();
   }
 
@@ -131,17 +120,6 @@ async function autoRelease() {
 }
 
 try {
-  console.log(process.env.INPUT_TAG_NAME)
-  // console.log(process.env.INPUT_GITHUB_TOKEN)
-
-  if (process.env.INPUT_TAG_NAME == undefined) {
-    throw new Error("undefined tag name");
-  }
-
-  if (process.env.INPUT_GITHUB_TOKEN == undefined) {
-    throw new Error("undefined github token");
-  }
-
   autoRelease();
 } catch (error) {
   core.setFailed(error.message);
