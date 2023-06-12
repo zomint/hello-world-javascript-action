@@ -1,13 +1,11 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'auto release'
+description: 'auto release'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  tag:  # tag
+    description: 'release tag name'
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+    default: 'lasted'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
